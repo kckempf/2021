@@ -1,12 +1,12 @@
 ﻿// See https://aka.ms/new-console-template for more information
 var instructions = File.ReadAllLines(Path.GetFullPath("input.txt"));
 var hash = new Dictionary<int, List<int>>(); // map between current number and List of indices with it
-var sums = new List<int>(); // list of sums of the solutions
 var curr = new List<int>(); // list of how many numbers selected
 var nums = instructions[0].Split(','); // numbers as they are called, for later
 List<int[]> board = new List<int[]>(); // each of our boards is an array of ints
 Dictionary<int, int> boards = new Dictionary<int, int>(); // indexes of rows to boards
 var boardTotals = new List<int>(); // totals of number left on boards
+List<int> boardsNotWon = new List<int>(); // List of boards that haven't yet won
 int boardnum = 0;
 for (int i = 2; i < instructions.Length; i++)
 {
@@ -19,14 +19,13 @@ for (int i = 2; i < instructions.Length; i++)
         for (int j = 0; j < board.Count; j++)
         {
             var row = board[j];
-            AddRow(row, hash, sums, curr, boardTotal, boards, boardnum);
+            AddRow(row, hash, curr, boards, boardnum);
             row = board.Select(x => x[j]).ToArray();
             diag1[j] = row[j];
             diag2[j] = row[row.Length - j - 1];
-            AddRow(row, hash, sums, curr, boardTotal, boards, boardnum);
+            AddRow(row, hash, curr, boards, boardnum);
         }
-        AddRow(diag1, hash, sums, curr, boardTotal, boards, boardnum);
-        AddRow(diag2, hash, sums, curr, boardTotal, boards, boardnum);
+        boardsNotWon.Add(boardnum);
         board = new List<int[]>();
         boardnum++;
     }
@@ -41,23 +40,31 @@ for (int i = 0; i < nums.Length; i++)
 {
     int.TryParse(nums[i], out int currentNum);
     var s = hash[currentNum];
+    var boardsHash = new HashSet<int>();
     foreach (var index in s)
     {
         curr[index] -= 1;
-        boardTotals[boards[index]] -= currentNum;
+        if (!boardsHash.Contains(boards[index]))
+        {
+            boardTotals[boards[index]] -= currentNum;
+            boardsHash.Add(boards[index]);
+        }
         if (curr[index] == 0)
         {
-            Console.WriteLine($"{boardTotals[boards[index]] * currentNum}");
+            if (boardsNotWon.Contains(boards[index]))
+            {
+                boardsNotWon.Remove(boards[index]);
+            }
+            Console.WriteLine($"{boardTotals[boards[index]] * currentNum}");  // First answer is part one, last answer is part two.
             Console.WriteLine($"winner: {currentNum} board: {boards[index]}");
-            return;
+            if (boardsNotWon.Count == 0)
+                return;
         }
     }
 }
 
-static void AddRow(int[] row, Dictionary<int, List<int>> hash, List<int> sums, List<int> curr, int boardTotal, Dictionary<int, int> boards, int boardnum)
+static void AddRow(int[] row, Dictionary<int, List<int>> hash, List<int> curr, Dictionary<int, int> boards, int boardnum)
 {
-    var sum = row.Sum();
-    sums.Add(boardTotal - sum);
     curr.Add(row.Length);
     for (int j = 0; j < row.Length; j++)
     {
@@ -65,8 +72,8 @@ static void AddRow(int[] row, Dictionary<int, List<int>> hash, List<int> sums, L
         {
             hash[row[j]] = new List<int>();
         }
-        hash[row[j]].Add(sums.Count - 1);
-        boards[sums.Count - 1] = boardnum;
+        hash[row[j]].Add(curr.Count - 1);
+        boards[curr.Count - 1] = boardnum;
     }
 }
 
