@@ -27,5 +27,29 @@ foreach (var r in nums)
             grid[i, row[1]] += 1;
         }
     }
+    else
+    {
+        var x1 = row[1] < row[3] ? row[0] : row[2];
+        var x2 = row[1] > row[3] ? row[0] : row[2];
+        var y1 = row[1] < row[3] ? row[1] : row[3];
+        if (x1 < x2)
+        {
+            for (int i = 0; i <= x2 - x1; i++)
+            {
+                if (grid[x1 + i, y1 + i] == 1)
+                    output++;
+                grid[x1 + i, y1 + i] += 1;
+            }
+        }
+        else
+        {
+            for (int i = 0; i <= x1 - x2; i++)
+            {
+                if (grid[x1 - i, y1 + i] == 1)
+                    output++;
+                grid[x1 - i, y1 + i] += 1;
+            }
+        }
+    }
 }
 Console.WriteLine($"output: {output}");
