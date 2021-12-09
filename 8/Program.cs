@@ -1,21 +1,11 @@
-﻿var instructions = File.ReadAllLines(Path.GetFullPath("input.txt")).Select(x=>x.Split('|').Select(y=>y.Trim().Split(' ').ToArray()).ToArray());
-var sample = @"be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
-edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
-fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef |cg cg fdcagb cbg
-fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega |efabcd cedba gadfec cb
-aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga |gecf egdcabf bgf bfgea
-fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf |gebdcfa ecba ca fadegcb
-dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf |cefg dcbef fcge gbcadfe
-bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd |ed bcgafe cdgba cbgef
-egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg |gbdfcae bgc cg cgb
-gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc |fgae cfgab fg bagce".Split(new string[]{Environment.NewLine}, StringSplitOptions.None).Select(x=>x.Split('|').Select(y=>y.Trim().Split(' ').ToArray()).ToArray());
+﻿var instructions = File.ReadAllLines(Path.GetFullPath("input.txt")).Select(x => x.Split('|').Select(y => y.Trim().Split(' ').ToArray()).ToArray());
 var output = 0;
 foreach (var value in instructions)
 {
     var outputValues = value[1];
     for (int j = 0; j < outputValues.Length; j++)
     {
-        switch(outputValues[j].Length)
+        switch (outputValues[j].Length)
         {
             case 2:
             case 4:
@@ -28,25 +18,104 @@ foreach (var value in instructions)
         }
     }
 }
+Console.WriteLine($"{output}");
+output = 0;
+
+foreach (var value in instructions)
+{
+    var dict = new Dictionary<string, char>();
+    var outputValues = value[0].Distinct().Select(x=>string.Concat(x.OrderBy(y=>y))).ToList();
+    var entriesList = value[1].Select(x=>string.Concat(x.OrderBy(y=>y))).ToList();
+    var fives = new List<string>();
+    var sixes = new List<string>();
+    var two = string.Empty;
+    var three = string.Empty;
+    var four = string.Empty;
+    foreach (var val in outputValues)
+    {
+        switch (val.Length)
+        {
+            case 2:
+                dict[val] = '1';
+                two = val;
+                break;
+            case 3:
+                dict[val] = '7';
+                three = val;
+                break;
+            case 4:
+                dict[val] = '4';
+                four = val;
+                break;
+            case 5:
+                fives.Add(val);
+                break;
+            case 6:
+                sixes.Add(val);
+                break;
+            case 7:
+                dict[val] = '8';
+                break;
+            default:
+                break;
+        }
+    }
+    ProcessFives(dict, two, four, fives);
+    ProcessSixes(dict, two, four, sixes);
+    var entry = string.Empty;
+    foreach (var en in entriesList)
+    {
+        entry += dict[en];
+    }
+    output += Convert.ToInt32(entry, 10);
+}
 
 Console.WriteLine($"{output}");
 
-// Visualization
-//  AAA
-// B   C
-// B   C
-//  DDD
-// E   F
-// E   F
-//  GGG
+void ProcessFives(Dictionary<string, char> dict, string two, string four, List<string> fives)
+{
+    List<string> process = fives.Select(x => x).ToList();
+    for (int i = 0; i < two.Length; i++)
+    {
+        process = process.Select(x => x.Replace(two[i].ToString(), string.Empty)).ToList();
+    }
+    int index = process.IndexOf(process.Where(x => x.Length == 3).FirstOrDefault());
+    dict[fives[index]] = '3';
+    fives.RemoveAt(index);
+    process.RemoveAt(index);
+    for (int i = 0; i < four.Length; i++)
+    {
+        process = process.Select(x => x.Replace(four[i].ToString(), string.Empty)).ToList();
+    }
+    for (int i = 0; i < process.Count; i++)
+    {
+        if (process[i].Length == 2)
+            dict[fives[i]] = '5';
+        else if (process[i].Length == 3)
+            dict[fives[i]] = '2';
+    }
+}
 
-// 0   ABC EFG  6
-// 1     C  F   2
-// 2   A CDE G  5
-// 3   A CD FG  5
-// 4    BCD F   4
-// 5   AB D FG  5
-// 6   AB DEFG  6
-// 7   A C  F   3
-// 8   ABCDEFG  7
-// 9   ABCD FG  6
+void ProcessSixes(Dictionary<string, char> dict, string two, string four, List<string> sixes)
+{
+    List<string> process = sixes.Select(x => x).ToList();
+    for (int i = 0; i < two.Length; i++)
+    {
+        process = process.Select(x => x.Replace(two[i].ToString(), string.Empty)).ToList();
+    }
+    int index = process.IndexOf(process.Where(x => x.Length == 5).FirstOrDefault());
+    dict[sixes[index]] = '6';
+    sixes.RemoveAt(index);
+    process.RemoveAt(index);
+    for (int i = 0; i < four.Length; i++)
+    {
+        process = process.Select(x => x.Replace(four[i].ToString(), string.Empty)).ToList();
+    }
+    for (int i = 0; i < process.Count; i++)
+    {
+        if (process[i].Length == 2)
+            dict[sixes[i]] = '9';
+        else if (process[i].Length == 3)
+            dict[sixes[i]] = '0';
+    }
+}
