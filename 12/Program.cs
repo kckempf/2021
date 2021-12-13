@@ -40,9 +40,9 @@ var output = 0;
 Recursion(nodes["start"]);
 Console.WriteLine($"{output}");
 
-var paths = new List<List<string>>();
+var paths = new Dictionary<int, List<string>>();
 output = Recursion2(nodes["start"], paths, 0);
-Console.WriteLine($"{output}");
+Console.WriteLine($"{paths.Count}");
 
 void Recursion(Node root)
 {
@@ -62,28 +62,25 @@ void Recursion(Node root)
     }
 }
 
-int Recursion2(Node root, List<List<string>> list, int attempt)
+int Recursion2(Node root, Dictionary<int, List<string>> list, int attempt)
 {
-    if (attempt + 1 > list.Count)
-        list.Add(new List<string>());
-    var curr = list[attempt];
+    var curr = list.ContainsKey(attempt) ? list[attempt] : new List<string>();
     curr.Add(root.Name);
 
     if (root.Name == "end")
     {
-        list.Add(curr);
+        list[attempt] = curr;
         return attempt + 1;
     }
 
     foreach (var node in root.Adjacency)
     {
-        if (!node.IsSmall || !curr.Contains(node.Name))
-        {
-            list[attempt] = curr;
-            attempt = Recursion2(node, list, attempt);
-        }
+        if (char.IsLower(node.Name[0]) && curr.Contains(node.Name))
+            continue;
+        list[attempt] = curr;
+        attempt = Recursion2(node, list, attempt);
     }
-    list.RemoveAt(attempt);
+    list.Remove(attempt);
     return attempt;
 }
 
@@ -101,3 +98,22 @@ public class Node
         Adjacency = new List<Node>();
     }
 }
+
+    // "fs-end",
+    // "he-DX",
+    // "fs-he",
+    // "start-DX",
+    // "pj-DX",
+    // "end-zg",
+    // "zg-sl",
+    // "zg-pj",
+    // "pj-he",
+    // "RW-he",
+    // "fs-DX",
+    // "pj-RW",
+    // "zg-RW",
+    // "start-pj",
+    // "he-WI",
+    // "zg-he",
+    // "pj-fs",
+    // "start-RW"
