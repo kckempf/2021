@@ -1,24 +1,4 @@
 ﻿var setup = File.ReadAllLines(Path.GetFullPath("input.txt"));
-// var setup = new string[]{
-//     "6,10",
-//     "0,14",
-//     "9,10",
-//     "0,3",
-//     "10,4",
-//     "4,11",
-//     "6,0",
-//     "6,12",
-//     "4,1",
-//     "0,13",
-//     "10,12",
-//     "3,4",
-//     "3,0",
-//     "8,4",
-//     "1,10",
-//     "2,14",
-//     "8,10",
-//     "9,0"
-// };
 var rowIndex = 0;
 var grid = new List<int[]>();
 var maxX = 0;
@@ -41,12 +21,44 @@ while (rowIndex < setup.Count())
 }
 
 var instruction = instructions[0].Split('=');
+var arrayComparer = new ArrayComparer();
 if (instruction[0] == "x")
     grid = FoldX(int.Parse(instruction[1]), grid);
 else if (instruction[0] == "y")
     grid = FoldY(int.Parse(instruction[1]), grid);
-grid = grid.Distinct(new ArrayComparer()).ToList();
+
 Console.WriteLine($"{grid.Count}");
+
+for (int i = 1; i < instructions.Count; i++)
+{
+    instruction = instructions[i].Split('=');
+    if (instruction[0] == "x")
+        grid = FoldX(int.Parse(instruction[1]), grid);
+    else if (instruction[0] == "y")
+        grid = FoldY(int.Parse(instruction[1]), grid);
+}
+
+var MaxX = grid.Select(x=>x[0]).Max() + 1;
+var MaxY = grid.Select(x=>x[1]).Max() + 1;
+
+var outputGrid = new char[MaxY][];
+
+for (int i = 0; i < MaxY; i++)
+{
+    outputGrid[i] = new char[MaxX];
+    for (int j = 0; j < MaxX; j++)
+    {
+        outputGrid[i][j] = '-';
+    }
+}
+
+for (int i = 0; i < grid.Count; i++)
+{
+    outputGrid[grid[i][1]][grid[i][0]] = '#';
+}
+
+for (int i = 0; i < outputGrid.Length; i++)
+    Console.WriteLine($"{new string(outputGrid[i])}");
 
 List<int[]> FoldX(int x, List<int[]> grid)
 {
@@ -58,7 +70,7 @@ List<int[]> FoldX(int x, List<int[]> grid)
         grid[index][0] = x - diff;
         index--;
     }
-    return grid.Where(p => p[0] != x).ToList();
+    return grid.Where(p => p[0] != x).Distinct(arrayComparer).ToList();
 }
 
 List<int[]> FoldY(int y, List<int[]> grid)
@@ -71,7 +83,7 @@ List<int[]> FoldY(int y, List<int[]> grid)
         grid[index][1] = y - diff;
         index--;
     }
-    return grid.Where(p => p[1] != y).ToList();
+    return grid.Where(p => p[1] != y).Distinct(arrayComparer).ToList();
 }
 
 public class ArrayComparer : IEqualityComparer<int[]>
@@ -93,19 +105,3 @@ public class ArrayComparer : IEqualityComparer<int[]>
         return a.Sum();
     }
 }
-
-// ...#..#..#.  0 = 7 - 7
-// ....#......  1 = 7 - 6
-// ...........  2 = 7 - 5
-// #..........  3 = 7 - 4
-// ...#....#.#  4 = 7 - 3
-// ...........
-// ........... 
-// ...........  7
-// ...........
-// ...........
-// .#....#.##.  10 = 7 + 3   1,10 -> 1,4 | 6,10 -> 6,4
-// ....#......  11 = 7 + 4
-// ......#...#  12 = 7 + 5
-// #..........  13 = 7 + 6
-// #.#........  14 = 7 + 7   2,14 -> 2,0
