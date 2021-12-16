@@ -16,7 +16,6 @@ int ShortestPath(int[][] input, int multiplier, int width)
     var pq = new PriorityQueue<int[], int>();       // Initialize Priority Queue
     pq.Enqueue(new int[] { 0, 0 }, 0);
     var cell = new int[] { 0, 0 };
-    var output = 0;
     var sum = 0;
     while (
         pq.Count > 0 &&

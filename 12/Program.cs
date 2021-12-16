@@ -1,25 +1,48 @@
 ﻿//var edges = File.ReadAllLines(Path.GetFullPath("input.txt")).Select(x => x.Split('-').ToArray()).ToArray();
+// var edges = new string[]
+// {
+//     "fs-end",
+//     "he-DX",
+//     "fs-he",
+//     "start-DX",
+//     "pj-DX",
+//     "end-zg",
+//     "zg-sl",
+//     "zg-pj",
+//     "pj-he",
+//     "RW-he",
+//     "fs-DX",
+//     "pj-RW",
+//     "zg-RW",
+//     "start-pj",
+//     "he-WI",
+//     "zg-he",
+//     "pj-fs",
+//     "start-RW"
+// }.Select(x => x.Split('-').ToArray()).ToArray();
 var edges = new string[]
 {
-    "fs-end",
-    "he-DX",
-    "fs-he",
-    "start-DX",
-    "pj-DX",
-    "end-zg",
-    "zg-sl",
-    "zg-pj",
-    "pj-he",
-    "RW-he",
-    "fs-DX",
-    "pj-RW",
-    "zg-RW",
-    "start-pj",
-    "he-WI",
-    "zg-he",
-    "pj-fs",
-    "start-RW"
+    "start-A",
+    "start-b",
+    "A-c",
+    "A-b",
+    "b-d",
+    "A-end",
+    "b-end"
 }.Select(x => x.Split('-').ToArray()).ToArray();
+// var edges = new string[]
+// {
+//     "dc-end",
+//     "HN-start",
+//     "start-kj",
+//     "dc-start",
+//     "dc-HN",
+//     "LN-dc",
+//     "HN-end",
+//     "kj-sa",
+//     "kj-HN",
+//     "kj-dc"
+// }.Select(x => x.Split('-').ToArray()).ToArray();
 var nodes = new Dictionary<string, Node>();
 
 foreach (var edge in edges)
@@ -41,8 +64,10 @@ Recursion(nodes["start"]);
 Console.WriteLine($"{output}");
 
 var paths = new Dictionary<int, List<string>>();
-output = Recursion2(nodes["start"], paths, 0);
-Console.WriteLine($"{paths.Count}");
+//output = Recursion2(nodes["start"], paths, 0);
+output = 0;
+Recursion3(nodes["start"], false, string.Empty);
+Console.WriteLine($"{output}");
 
 void Recursion(Node root)
 {
@@ -60,6 +85,31 @@ void Recursion(Node root)
             node.IsVisited = false;
         }
     }
+}
+
+void Recursion3(Node root, bool isFlipped, string current)
+{
+    current += $",{root.Name}";
+    if (root.Name == "start" || (root.IsSmall && isFlipped))
+        root.IsVisited = true;
+    else
+        isFlipped = true;
+    if (root.Name == "end")
+    {
+        isFlipped = false;
+        output += 1;
+        Console.WriteLine(current);
+        return;
+    }
+    foreach (var node in root.Adjacency)
+    {
+        if (!node.IsSmall || !node.IsVisited)
+        {
+            Recursion3(node, isFlipped, current);
+            node.IsVisited = false;
+        }
+    }
+    isFlipped = false;
 }
 
 int Recursion2(Node root, Dictionary<int, List<string>> list, int attempt)
@@ -99,21 +149,21 @@ public class Node
     }
 }
 
-    // "fs-end",
-    // "he-DX",
-    // "fs-he",
-    // "start-DX",
-    // "pj-DX",
-    // "end-zg",
-    // "zg-sl",
-    // "zg-pj",
-    // "pj-he",
-    // "RW-he",
-    // "fs-DX",
-    // "pj-RW",
-    // "zg-RW",
-    // "start-pj",
-    // "he-WI",
-    // "zg-he",
-    // "pj-fs",
-    // "start-RW"
+// "fs-end",
+// "he-DX",
+// "fs-he",
+// "start-DX",
+// "pj-DX",
+// "end-zg",
+// "zg-sl",
+// "zg-pj",
+// "pj-he",
+// "RW-he",
+// "fs-DX",
+// "pj-RW",
+// "zg-RW",
+// "start-pj",
+// "he-WI",
+// "zg-he",
+// "pj-fs",
+// "start-RW"
